@@ -3,8 +3,10 @@
 
 result	=	bfi
 incpath =	-I/usr/include/ -Isrc/
-src	=	src/main.c
-obj	=	main.o
+src	=	src/main.c\
+		src/bfi.c
+obj	=	main.o\
+		bfi.o
 
 all: release
 
