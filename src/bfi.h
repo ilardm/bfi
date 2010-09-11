@@ -4,6 +4,7 @@
 #include "main.h"
 #include "common.h"
 
+UCHAR* prepare(UCHAR* _buffer);
 BOOL validate(UCHAR* _buffer);
 BOOL execute(UCHAR* _buffer);
 void memDump();
@@ -13,5 +14,7 @@ UCHAR* used_memory;
 extern UCHAR* bf_mem;
 extern UCHAR* bf_sc;
 extern UCHAR* bf_mp;
+
+extern long bfo;
 
 #endif

@@ -11,5 +11,6 @@ void help(char* _name);
 UCHAR* bf_mem;
 UCHAR* bf_sc;
 UCHAR* bf_mp;
+long bfo;
 
 #endif
