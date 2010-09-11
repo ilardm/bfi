@@ -2,11 +2,13 @@
 # $@ - goal
 
 result	=	bfi
-incpath =	-I/usr/include/ -Isrc/
+incpath	=	-I/usr/include/ -Isrc/
 src	=	src/main.c\
-		src/bfi.c
+		src/bfi.c\
+		src/utils.c
 obj	=	main.o\
-		bfi.o
+		bfi.o\
+		utils.o
 
 all: release
 

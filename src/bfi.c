@@ -4,8 +4,9 @@
 
 #include "bfi.h"
 #include "main.h"
+#include "common.h"
 
-bool validate(unsigned char* _buffer)
+BOOL validate(UCHAR* _buffer)
 {
 	int sz=strlen(_buffer);
 	int i=0;
@@ -16,7 +17,6 @@ bool validate(unsigned char* _buffer)
 	printf("+++ validate: (len=%d) '%s'\n", sz, _buffer);
 	#endif
 
-	// TODO: validate for other chars
 	for ( i=0; i<sz; i++)
 	{
 		#if defined _DEBUG
@@ -48,7 +48,7 @@ bool validate(unsigned char* _buffer)
 	return op==cl;
 }
 
-bool execute(unsigned char* _buffer)
+BOOL execute(UCHAR* _buffer)
 {
 	if ( !validate(_buffer) )
 	{
@@ -63,8 +63,8 @@ bool execute(unsigned char* _buffer)
 	#endif
 
 	int sz=strlen(_buffer);
-	unsigned char* tmp_buffer;
-	unsigned char* bf_sp=_buffer;
+	UCHAR* tmp_buffer;
+	UCHAR* bf_sp=_buffer;
 
 	while ( bf_sp<_buffer+sz )
 	{
@@ -85,6 +85,11 @@ bool execute(unsigned char* _buffer)
 			#else
 			(*bf_mp)++;
 			#endif
+
+			if ( used_memory<bf_mp )
+			{
+				used_memory=bf_mp;
+			}
 		}
 
 		if ( *bf_sp=='-' )
@@ -100,6 +105,11 @@ bool execute(unsigned char* _buffer)
 			#else
 			(*bf_mp)--;
 			#endif
+
+			if ( used_memory<bf_mp )
+			{
+				used_memory=bf_mp;
+			}
 		}
 
 		if ( *bf_sp=='>' )
@@ -117,16 +127,19 @@ bool execute(unsigned char* _buffer)
 				#else
 				bf_mp++;
 				#endif
+
+				if ( used_memory<bf_mp )
+				{
+					used_memory=bf_mp;
+				}
 			}
 			else
 			{
 				#if defined _DEBUG
-				printf("--- execute>: out of memory range\n");
+				printf("--- execute>: out of memory bounds\n");
 				#else
-				printf("error: out of memory\n");
+				printf("warning: out of memory bounds\n");
 				#endif
-				return false;
-// 				break;
 			}
 		}
 
@@ -149,12 +162,10 @@ bool execute(unsigned char* _buffer)
 			else
 			{
 				#if defined _DEBUG
-				printf("--- execute<: out of memory range\n");
+				printf("--- execute<: out of memory bounds\n");
 				#else
-				printf("error: out of memory\n");
+				printf("warning: out of memory bounds\n");
 				#endif
-				return false;
-// 				break;
 			}
 		}
 
@@ -165,10 +176,16 @@ bool execute(unsigned char* _buffer)
 // 			#endif
 
 			#if defined _DEBUG
-			printf("%c (0x%0X)", *bf_mp, *bf_mp);
+// 			printf("%c (0x%0X)", *bf_mp, *bf_mp);
+			memDump();
 			#else
 			printf("%c", *bf_mp);
 			#endif
+
+			if ( used_memory<bf_mp )
+			{
+				used_memory=bf_mp;
+			}
 		}
 
 		if ( *bf_sp==',' )
@@ -177,7 +194,16 @@ bool execute(unsigned char* _buffer)
 // 			printf("+++ execute: ,\n");
 // 			#endif
 
-			*bf_mp=(unsigned char)getchar();
+			*bf_mp=(UCHAR)getchar();
+
+			#if defined _DEBUG
+			printf("+++ execute,: 0x%x\n", *bf_mp);
+			#endif
+
+			if ( used_memory<bf_mp )
+			{
+				used_memory=bf_mp;
+			}
 		}
 
 		if ( *bf_sp=='[' )
@@ -186,9 +212,9 @@ bool execute(unsigned char* _buffer)
 			printf("+++ execute: '[' found @ 0x%X\n", bf_sp);
 			#endif
 
-			unsigned char* tmp_bf_sp=index(bf_sp, ']')+1;
+			UCHAR* tmp_bf_sp=index(bf_sp, ']')+1;
 			int tmp_sz=abs(bf_sp-tmp_bf_sp);
-			tmp_buffer=(unsigned char*)calloc(tmp_sz, sizeof(char));
+			tmp_buffer=(UCHAR*)calloc(tmp_sz, sizeof(char));
 			if ( tmp_buffer )
 			{
 				strncpy(tmp_buffer, bf_sp, tmp_sz);
@@ -200,7 +226,7 @@ bool execute(unsigned char* _buffer)
 				#endif
 				tmp_bf_sp=index(tmp_bf_sp, ']')+1;
 				tmp_sz=abs(bf_sp-tmp_bf_sp);
-				tmp_buffer=(unsigned char*)realloc(tmp_buffer, tmp_sz);
+				tmp_buffer=(UCHAR*)realloc(tmp_buffer, tmp_sz);
 
 				if ( tmp_buffer )
 				{
@@ -236,4 +262,49 @@ bool execute(unsigned char* _buffer)
 	}
 
 	return true;
+}
+
+void memDump()
+{
+	#if defined _DEBUG
+	printf("\nmemDump():\n");
+	#endif
+	
+	int i=0;
+	int sz=abs(used_memory-bf_mem)+1;		// dump only used memory.
+
+	#if defined _DEBUG
+	printf("+++ memDump: sz=%d (0x%X && 0x%X)\n", sz, bf_mem, used_memory);
+	#endif
+
+	for ( i=0; i<sz; i++ )
+	{
+		// line number
+		if ( i%16==0 )
+		{
+			printf("%08X  ", bf_mem+i);
+		}
+
+		if ( i%2==0 )
+		{
+			printf("%02x", bf_mem[i]);
+		}
+		else
+		{
+			if ( (i%16)%7==0 )
+			{
+				printf("%02x  ", bf_mem[i]);
+			}
+			else
+			{
+				printf("%02x ", bf_mem[i]);
+			}
+		}
+
+		if ( (i+1)%16==0)
+		{
+			printf("\n");
+		}
+	}
+	printf("\n");
 }

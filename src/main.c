@@ -4,6 +4,7 @@
 #include <memory.h>
 
 #include "main.h"
+#include "common.h"
 #include "bfi.h"
 
 int main(int argc, char* argv[])
@@ -19,15 +20,15 @@ int main(int argc, char* argv[])
 	}
 	#endif
 
-	bf_mem=(unsigned char*)calloc(BF_MEMORY_SIZE, sizeof(char));
+	bf_mem=(UCHAR*)calloc(BF_MEMORY_SIZE, sizeof(char));
 
 	FILE* bf_sc_fd;
-	if ( argc>1 )
+	if ( argc>1 && strEndsWith(argv[1], ".bf") )
 	{
 		bf_sc_fd=fopen(argv[argc-1], "r");
 		if ( bf_sc_fd )
 		{
-			bf_sc=(unsigned char*)calloc(BUFFER_SIZE, sizeof(char));
+			bf_sc=(UCHAR*)calloc(BUFFER_SIZE, sizeof(char));
 			int bf_sc_sz=0;
 			int readb=0;
 			while( !feof(bf_sc_fd) )
@@ -46,7 +47,7 @@ int main(int argc, char* argv[])
 					if ( readb==1 )
 					{
 						bf_sc_sz+=1;
-						bf_sc=(unsigned char*)realloc(bf_sc,
+						bf_sc=(UCHAR*)realloc(bf_sc,
 													  (bf_sc_sz+1)*BUFFER_SIZE*sizeof(char));
 					}
 				}
@@ -99,6 +100,10 @@ int main(int argc, char* argv[])
 		{
 			printf("can't open '%s'\n", argv[argc-1]);
 		}
+	}
+	else
+	{
+		printf("'%s' seems to be not a BF source\n", argv[1]);
 	}
 
 	#if defined _DEBUG
