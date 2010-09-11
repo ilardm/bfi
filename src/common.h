@@ -1,6 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#define VERSION 1.0F
+
 typedef char BOOL;
 #define true 1
 #define false 0

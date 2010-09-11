@@ -76,6 +76,7 @@ int main(int argc, char* argv[])
 						bf_sc_sz+=1;
 						bf_sc=(UCHAR*)realloc(bf_sc,
 													  (bf_sc_sz+1)*BUFFER_SIZE*sizeof(char));
+						memset(bf_sc+(BUFFER_SIZE*bf_sc_sz), 0, BUFFER_SIZE);
 					}
 				}
 				else
@@ -167,7 +168,7 @@ int findParam(char** _where, int _count, UCHAR* _param)
 
 void help(char* _name)
 {
-	printf("pure BrainF*k interpreter\n\n");
+	printf("pure BrainF*k interpreter v%02.2f\n\n", VERSION);
 
 	if ( _name )
 	{

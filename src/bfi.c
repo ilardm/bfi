@@ -176,10 +176,9 @@ BOOL execute(UCHAR* _buffer)
 // 			#endif
 
 			#if defined _DEBUG
-// 			printf("%c (0x%0X)", *bf_mp, *bf_mp);
 			memDump();
 			#else
-			printf("%c", *bf_mp);
+			putchar(*bf_mp);
 			#endif
 
 			if ( used_memory<bf_mp )
@@ -217,7 +216,8 @@ BOOL execute(UCHAR* _buffer)
 			tmp_buffer=(UCHAR*)calloc(tmp_sz, sizeof(char));
 			if ( tmp_buffer )
 			{
-				strncpy(tmp_buffer, bf_sp, tmp_sz);
+				memcpy(tmp_buffer, bf_sp, tmp_sz);
+				tmp_buffer[tmp_sz]=0;
 			}
 			else
 			{
@@ -237,10 +237,11 @@ BOOL execute(UCHAR* _buffer)
 				tmp_bf_sp=index(tmp_bf_sp, ']')+1;
 				tmp_sz=abs(bf_sp-tmp_bf_sp);
 				tmp_buffer=(UCHAR*)realloc(tmp_buffer, tmp_sz);
+				memset(tmp_buffer, 0, tmp_sz);
 
 				if ( tmp_buffer )
 				{
-					strncpy(tmp_buffer, bf_sp, tmp_sz);
+					memcpy(tmp_buffer, bf_sp, tmp_sz);
 					tmp_buffer[tmp_sz]=0;
 				}
 				else
@@ -299,7 +300,7 @@ void memDump()
 	int mp=abs(bf_mem-bf_mp);
 	BOOL bmp=false;
 	#if defined _DEBUG
-	printf("+++ memDump: now bf_mp points to #%d celll\n", mp);
+	printf("+++ memDump: now bf_mp points to #%d cell\n", mp);
 	#endif
 
 	#if defined _DEBUG
@@ -309,8 +310,7 @@ void memDump()
 	for ( i=0; i<sz; i++ )
 	{
 		bmp= (i==mp) ? true : false;
-		// TODO: highlight with color
-		
+
 		// line number
 		if ( i%16==0 )
 		{
@@ -319,20 +319,65 @@ void memDump()
 
 		if ( i%2==0)
 		{
+			#if defined linux
+			if ( bmp )
+			{
+				putchar(0x1b);
+				printf("[1;33m");
+				printf("%02x", bf_mem[i]);
+				putchar(0x1b);
+				printf("[0m");
+			}
+			else
+			{
+				printf("%02x", bf_mem[i]);
+			}
+			#else
 			printf( bmp ? "*%02x*" : "%02x",
 					bf_mem[i]);
+			#endif
 		}
 		else
 		{
 			if ( (i%16)%7==0 )
 			{
+				#if defined linux
+				if ( bmp )
+				{
+					putchar(0x1b);
+					printf("[1;33m");
+					printf("%02x  ", bf_mem[i]);
+					putchar(0x1b);
+					printf("[0m");
+				}
+				else
+				{
+					printf("%02x  ", bf_mem[i]);
+				}
+				#else
 				printf( bmp ? "*%02x*  ": "%02x  ",
 						bf_mem[i]);
+				#endif
 			}
 			else
 			{
+				#if defined linux
+				if ( bmp )
+				{
+					putchar(0x1b);
+					printf("[1;33m");
+					printf("%02x ", bf_mem[i]);
+					putchar(0x1b);
+					printf("[0m");
+				}
+				else
+				{
+					printf("%02x ", bf_mem[i]);
+				}
+				#else
 				printf( bmp ? "*%02x* " : "%02x ",
 						bf_mem[i]);
+				#endif
 			}
 		}
 
