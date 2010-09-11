@@ -63,7 +63,7 @@ BOOL execute(UCHAR* _buffer)
 	#endif
 
 	int sz=strlen(_buffer);
-	UCHAR* tmp_buffer;
+	UCHAR* tmp_buffer;		// copy here body of loop cycle if any
 	UCHAR* bf_sp=_buffer;
 
 	while ( bf_sp<_buffer+sz )
@@ -209,7 +209,7 @@ BOOL execute(UCHAR* _buffer)
 		if ( *bf_sp=='[' )
 		{
 			#if defined _DEBUG
-			printf("+++ execute: '[' found @ 0x%X\n", bf_sp);
+			printf("+++ execute[: '[' found @ 0x%X\n", bf_sp);
 			#endif
 
 			UCHAR* tmp_bf_sp=index(bf_sp, ']')+1;
@@ -219,10 +219,20 @@ BOOL execute(UCHAR* _buffer)
 			{
 				strncpy(tmp_buffer, bf_sp, tmp_sz);
 			}
+			else
+			{
+				#if defined _DEBUG
+				printf("--- execute[: tmp_buffer=NULL\n");
+				#else
+				printf("error: can't allocate memory\n");
+				#endif
+				return false;
+			}
+			
 			while ( tmp_buffer && !validate(tmp_buffer) )
 			{
 				#if defined _DEBUG
-				printf("+++ execute::searchEndOfCycle: '%s'(%d) is invalid : ++\n", tmp_buffer, tmp_sz);
+				printf("+++ execute[::searchEndOfCycle: '%s'(%d) is invalid : ++\n", tmp_buffer, tmp_sz);
 				#endif
 				tmp_bf_sp=index(tmp_bf_sp, ']')+1;
 				tmp_sz=abs(bf_sp-tmp_bf_sp);
@@ -232,6 +242,15 @@ BOOL execute(UCHAR* _buffer)
 				{
 					strncpy(tmp_buffer, bf_sp, tmp_sz);
 					tmp_buffer[tmp_sz]=0;
+				}
+				else
+				{
+					#if defined _DEBUG
+					printf("--- execute[: tmp_buffer=NULL\n");
+					#else
+					printf("error: can't allocate memory\n");
+					#endif
+					return false;
 				}
 			}
 
@@ -247,6 +266,10 @@ BOOL execute(UCHAR* _buffer)
 					#endif
 					if ( !execute(tmp_buffer+1) )
 					{
+						#if defined _DEBUG
+						printf("--- execute: error execute while recursive calls\n");
+						memDump();
+						#endif
 						return false;
 					}
 				}
@@ -273,31 +296,43 @@ void memDump()
 	int i=0;
 	int sz=abs(used_memory-bf_mem)+1;		// dump only used memory.
 
+	int mp=abs(bf_mem-bf_mp);
+	BOOL bmp=false;
+	#if defined _DEBUG
+	printf("+++ memDump: now bf_mp points to #%d celll\n", mp);
+	#endif
+
 	#if defined _DEBUG
 	printf("+++ memDump: sz=%d (0x%X && 0x%X)\n", sz, bf_mem, used_memory);
 	#endif
 
 	for ( i=0; i<sz; i++ )
 	{
+		bmp= (i==mp) ? true : false;
+		// TODO: highlight with color
+		
 		// line number
 		if ( i%16==0 )
 		{
 			printf("%08X  ", bf_mem+i);
 		}
 
-		if ( i%2==0 )
+		if ( i%2==0)
 		{
-			printf("%02x", bf_mem[i]);
+			printf( bmp ? "*%02x*" : "%02x",
+					bf_mem[i]);
 		}
 		else
 		{
 			if ( (i%16)%7==0 )
 			{
-				printf("%02x  ", bf_mem[i]);
+				printf( bmp ? "*%02x*  ": "%02x  ",
+						bf_mem[i]);
 			}
 			else
 			{
-				printf("%02x ", bf_mem[i]);
+				printf( bmp ? "*%02x* " : "%02x ",
+						bf_mem[i]);
 			}
 		}
 
