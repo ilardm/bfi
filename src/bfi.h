@@ -7,7 +7,9 @@
 UCHAR* prepare(UCHAR* _buffer);
 BOOL validate(UCHAR* _buffer);
 BOOL execute(UCHAR* _buffer);
+
 void memDump();
+void printSource(UCHAR* _buffer, UCHAR* _sp);
 
 UCHAR* used_memory;
 

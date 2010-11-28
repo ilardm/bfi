@@ -186,14 +186,16 @@ BOOL execute(UCHAR* _buffer)
 		if ( *bf_sp=='@' )
 		{
 			#if defined _DEBUG
-			printf("+++ executeq: breakpoint reached\n");
+			printf("\n+++ executeq: breakpoint reached\n");
 			memDump();
+			printSource(_buffer, bf_sp);
 			getchar();
 			#else
 			if ( bfo & BFO_DEBUG )
 			{
-				printf("stop on breakpoint\n");
+				printf("\nstop on breakpoint\n");
 				memDump();
+				printSource(_buffer, bf_sp);
 				getchar();
 			}
 			#endif
@@ -309,6 +311,8 @@ BOOL execute(UCHAR* _buffer)
 			printf("+++ execute: >\n");
 			#endif
 
+			repeat=1;
+
 			if ( (bfo & BFO_QUICK) && bf_sp<_buffer+sz+1 )
 			{
 				if ( *(bf_sp+1)>=48 && *(bf_sp+1)<=57 )
@@ -334,7 +338,6 @@ BOOL execute(UCHAR* _buffer)
 					#if defined _DEBUG
 					printf("--- executeq: '%c' NAN\n", *(bf_sp+1));
 					#endif
-					repeat=1;
 				}
 			}
 
@@ -373,6 +376,8 @@ BOOL execute(UCHAR* _buffer)
 			printf("+++ execute: <\n");
 			#endif
 
+			repeat=1;
+
 			if ( (bfo & BFO_QUICK) && bf_sp<_buffer+sz+1 )
 			{
 				if ( *(bf_sp+1)>=48 && *(bf_sp+1)<=57 )
@@ -398,7 +403,6 @@ BOOL execute(UCHAR* _buffer)
 					#if defined _DEBUG
 					printf("--- executeq: '%c' NAN\n", *(bf_sp+1));
 					#endif
-					repeat=1;
 				}
 			}
 
@@ -631,11 +635,9 @@ void memDump()
 			#if defined linux
 			if ( bmp )
 			{
-				putchar(0x1b);
-				printf("[1;33m");
+				setColor(CL_YELLOW);
 				printf("%02x", bf_mem[i]);
-				putchar(0x1b);
-				printf("[0m");
+				setColor(CL_NONE);
 			}
 			else
 			{
@@ -653,11 +655,9 @@ void memDump()
 				#if defined linux
 				if ( bmp )
 				{
-					putchar(0x1b);
-					printf("[1;33m");
+					setColor(CL_YELLOW);
 					printf("%02x  ", bf_mem[i]);
-					putchar(0x1b);
-					printf("[0m");
+					setColor(CL_NONE);
 				}
 				else
 				{
@@ -673,11 +673,9 @@ void memDump()
 				#if defined linux
 				if ( bmp )
 				{
-					putchar(0x1b);
-					printf("[1;33m");
+					setColor(CL_YELLOW);
 					printf("%02x ", bf_mem[i]);
-					putchar(0x1b);
-					printf("[0m");
+					setColor(CL_NONE);
 				}
 				else
 				{
@@ -693,6 +691,59 @@ void memDump()
 		if ( (i+1)%16==0)
 		{
 			printf("\n");
+		}
+	}
+	printf("\n");
+}
+
+void printSource(UCHAR* _buffer, UCHAR* _sp)
+{
+	#if defined _DEBUG
+	printf("+++ printSource: '%s' -> '%c'(%d)\n", _buffer, *_sp, abs(_buffer-_sp));
+	#else
+	printf("current source: ");
+	#endif
+
+	int delta=15;
+	
+	UCHAR* start=0;
+	UCHAR* stop=0;
+	int sz=strlen(_buffer);
+
+	if ( _sp-delta>=_buffer )
+	{
+		start=_sp-delta;
+	}
+	else
+	{
+		start=_buffer;
+	}
+	
+	if ( _sp+delta<=_buffer+sz )
+	{
+		stop=_sp+delta;
+	}
+	else
+	{
+		stop=_buffer+sz;
+	}
+
+	UCHAR* i=0;
+	for ( i=start; i<stop; i++ )
+	{
+		if ( i==_sp )
+		{
+			#if defined linux
+			setColor(CL_YELLOW);
+			printf("%c", *i);
+			setColor(CL_NONE);
+			#else
+			printf("**%c**", *i);
+			#endif
+		}
+		else
+		{
+			printf("%c", *i);
 		}
 	}
 	printf("\n");

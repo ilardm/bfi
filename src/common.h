@@ -17,6 +17,12 @@ enum
 	BFO_DEBUG=2
 };
 
+enum
+{
+	CL_NONE=0,
+	CL_YELLOW=33
+};
+
 typedef char BOOL;
 #define true 1
 #define false 0
