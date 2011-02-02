@@ -27,16 +27,26 @@ int main(int argc, char* argv[])
 			)
 		{
 			help(argv[0]);
-			return 0;
+			return RET_SUCCES;
 		}
 	}
 	else
 	{
 		printf("error: not enought params\n");
 		help(argv[0]);
-		return 1;
+		return RET_ERR_PARAMS;
 	}
-	
+
+	bfo=0;
+	if ( findParam(argv, argc, "-d")>0 ||
+		findParam(argv, argc, "--debug")>0
+		)
+	{
+		bfo |= BFO_DEBUG;
+		#if defined _DEBUG
+		printf("+++ main: in debug BF mode: bfo: 0x%X\n", bfo);
+		#endif
+	}
 
 	bf_mem=(UCHAR*)calloc(BF_MEMORY_SIZE, sizeof(char));
 	if ( !bf_mem )
@@ -46,11 +56,11 @@ int main(int argc, char* argv[])
 		#else
 		printf("error: can't allocate memory for BF cells\n");
 		#endif
-		return 2;
+		return RET_ERR_MEM;
 	}
 
 	FILE* bf_sc_fd;
-	if ( argc>1 && strEndsWith(argv[argc-1], ".bf") )
+	if ( argc>1 && strEndsWith(argv[argc-1], "bf") )
 	{
 		bf_sc_fd=fopen(argv[argc-1], "r");
 		if ( bf_sc_fd )
@@ -84,17 +94,58 @@ int main(int argc, char* argv[])
 					#if defined _DEBUG
 					printf("--- bf_sc=NULL\n");
 					#endif
-					break;
+					return RET_ERR_MEM;
 				}
 			}
 			close(bf_sc_fd);
 
-			#if defined _DEBUG
 			if ( bf_sc )
 			{
-				printf("bf_sc (%d):\n'%s'\n", BUFFER_SIZE*(bf_sc_sz+1)*sizeof(char), bf_sc);
+				#if defined _DEBUG
+				printf("bf_sc @ 0x%X (%d):\n'%s'\n", bf_sc,
+					   BUFFER_SIZE*(bf_sc_sz+1)*sizeof(char),
+					   bf_sc);
+				#endif
+
+				if ( strEndsWith(argv[argc-1], ".qbf") ||
+					findParam(argv, argc, "-q")>0 ||
+					findParam(argv, argc, "--quick")>0
+					)
+				{
+					bfo |= BFO_QUICK;
+					#if defined _DEBUG
+					printf("+++ main: in quick BF mode: bfo: 0x%X\n", bfo);
+					#endif
+					
+					#if defined _DEBUG
+					printf("+++ main: prepare sc\n");
+					#endif
+					
+					bf_sc=prepare(bf_sc);
+					if ( bf_sc )
+					{
+						#if defined _DEBUG
+						printf("bf_sc @ 0x%X (%d):\n'%s'\n", bf_sc,
+							BUFFER_SIZE*(bf_sc_sz+1)*sizeof(char),
+							bf_sc);
+						#endif
+					}
+					else
+					{
+						#if defined _DEBUG
+						printf("--- main: can't prepare SC\n");
+						#endif
+						return RET_ERR_SC;
+					}
+				}
 			}
-			#endif
+
+			if ( findParam(argv, argc, "-sc")>0 ||
+				findParam(argv, argc, "--show-code")>0
+				)
+			{
+				printf("Source code:\n'%s'\n", bf_sc);
+			}
 
 			if ( bf_sc )
 			{
@@ -138,7 +189,7 @@ int main(int argc, char* argv[])
 	printf("+++ stop\n");
 	#endif
 
-	return 0;
+	return RET_SUCCES;
 };
 
 
@@ -168,7 +219,7 @@ int findParam(char** _where, int _count, UCHAR* _param)
 
 void help(char* _name)
 {
-	printf("pure BrainF*k interpreter v%02.2f\n\n", VERSION);
+	printf("quick BrainF*k interpreter v%02.2f\n\n", VERSION);
 
 	if ( _name )
 	{
@@ -184,10 +235,18 @@ void help(char* _name)
 	
 	printf("Options:\n");
 	printf("\t-h, --help\tshow this help\n");
+	printf("\t-q, --quick\tto interpreter BF source as quick BrainF*k\n");
+	printf("\t-d, --debug\tto debug(stop on breakpoints) BF source\n");
+	printf("\t-sc, --show-code\tto show BF source (which will be executed) before execute it\n");
 
-	printf("\n<path_to_BF_source> must ends with '.bf' to execute it as pure BrainF*k code\n");
+	printf("\n");
 
-	printf("\nAuthor:\n");
+	printf("<path_to_BF_source> must ends with '.bf' to execute it as pure BrainF*k code\n");
+	printf("<path_to_BF_source> must ends with '.qbf' to execute it as quick BrainF*k code\n");
+
+	printf("\n");
+	
+	printf("Author:\n");
 	printf("Ilya Arefiev <arefiev.id@gmail.com>\n");
 	printf("© 2010 licenced under GPLv3\n");
 }

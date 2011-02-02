@@ -59,3 +59,11 @@ BOOL strEndsWith(UCHAR* _buffer, UCHAR* _end)
 		return false;
 	}
 }
+
+#if defined linux
+void setColor(int _color)
+{
+	putchar(0x1b);
+	printf("[%dm", _color);
+}
+#endif
