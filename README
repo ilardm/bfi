@@ -1,0 +1,3 @@
+brainf*k interpreter written in C
+started as project to practice in C, familiarize with brainf*k  and just for fun
+project isn't pretending to be full-futured brainf*k interpreter and contains custom sublanguage called QBF - "quick brainf*k"
