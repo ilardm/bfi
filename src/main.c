@@ -1,3 +1,21 @@
+/*
+  brainf*k interpreter written in C with little extension -- QBF
+  Copyright (C) 2011  Ilya Arefiev <arefiev.id@gmail.com>
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
@@ -220,6 +238,12 @@ int findParam(char** _where, int _count, UCHAR* _param)
 void help(char* _name)
 {
 	printf("quick BrainF*k interpreter v%02.2f\n\n", VERSION);
+	
+	printf("Copyright (C) 2011  Ilya Arefiev <ilardm@gmail.com>\n");
+	printf("This program licensed under GPLv3 and comes with ABSOLUTELY NO WARRANTY;\n");
+    printf("This is free software, and you are welcome to redistribute it\n");
+    printf("under certain conditions.\n");
+	printf("For details visit <http://www.gnu.org/licenses/gpl.html>\n\n");
 
 	if ( _name )
 	{
@@ -243,10 +267,4 @@ void help(char* _name)
 
 	printf("<path_to_BF_source> must ends with '.bf' to execute it as pure BrainF*k code\n");
 	printf("<path_to_BF_source> must ends with '.qbf' to execute it as quick BrainF*k code\n");
-
-	printf("\n");
-	
-	printf("Author:\n");
-	printf("Ilya Arefiev <arefiev.id@gmail.com>\n");
-	printf("© 2010 licenced under GPLv3\n");
 }
