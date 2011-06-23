@@ -1,3 +1,25 @@
 brainf*k interpreter written in C
 started as project to practice in C, familiarize with brainf*k  and just for fun
 project isn't pretending to be full-futured brainf*k interpreter and contains custom sublanguage called QBF - "quick brainf*k"
+
+=== BUILDING ===
+
+Required CMake for building.
+
+Run
+		mkdir build
+		cd build
+		cmake ..
+		make
+to build debug version of BFI
+
+Run
+		cmake -D Mode=release ..
+instead
+		cmake ..
+to build release version of BFI
+
+=== LICENSE ===
+
+Licensed under GPLv3.
+Your copy of license may be found in 'LICENSE' file.
